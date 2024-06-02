@@ -138,6 +138,18 @@ let _ =
   in
   declare_bool_option gdopt
 
+  let eqsat_enabled = ref true
+
+  let _ =
+    let gdopt=
+      { optdepr=None;
+        optstage = Interp;
+        optkey=["Hammer";"EQSAT"];
+        optread=(fun () -> !eqsat_enabled);
+        optwrite=(fun b -> eqsat_enabled := b)}
+    in
+    declare_bool_option gdopt
+
 let predict_path = ref "predict"
 
 let _ =
@@ -168,7 +180,7 @@ let _ =
   in
   declare_string_option gdopt
 
-let parallel_mode = ref true
+let parallel_mode = ref false
 
 let _ =
   let gdopt=
@@ -180,7 +192,7 @@ let _ =
   in
   declare_bool_option gdopt
 
-let debug_mode = ref false
+let debug_mode = ref true
 
 let _ =
   let gdopt=
