@@ -301,12 +301,24 @@ let extract_cvc4_data outfile =
   with _ ->
     raise (HammerError "Failed to extract CVC4 data")
 
+  let call_eqsat infile outfile =
+    let tmt = string_of_int !Opt.atp_timelimit in
+    let tmt2 = string_of_int (!Opt.atp_timelimit + 1) in
+    let cmd =
+      "htimeout " ^ tmt2 ^ " eqsat --tlimit " ^ tmt ^ " --out " ^ Sys.getcwd ()^ " --path " ^ infile ^ " > " ^ outfile
+    in
+    invoke_prover "eqsat_tptp" cmd outfile
+
+  let extract_eqsat_data outfile =
+    raise (HammerError "Failed to extract eqsat data")
+
 (******************************************************************************)
 
-let provers = [(Opt.vampire_enabled, "Vampire", call_vampire, extract_vampire_data);
+let provers = List.filteri (fun i x -> Int.equal i 4) [(Opt.vampire_enabled, "Vampire", call_vampire, extract_vampire_data);
                (Opt.z3_enabled, "Z3", call_z3, extract_z3_data);
                (Opt.eprover_enabled, "EProver", call_eprover, extract_eprover_data);
-               (Opt.cvc4_enabled, "CVC4", call_cvc4, extract_cvc4_data)]
+               (Opt.cvc4_enabled, "CVC4", call_cvc4, extract_cvc4_data);
+               (Opt.eqsat_enabled, "eqsat", call_eqsat, extract_eqsat_data)]
 
 let call_prover (enabled, pname, call, extract) fname ofname cont =
   let clean () =
@@ -359,6 +371,8 @@ let call_provers_par fname ofname =
   match Parallel.run_parallel (fun _ -> ()) (fun _ -> ()) time jobs with
   | None -> raise (HammerFailure "ATPs failed to find a proof")
   | Some x -> x
+
+let _ = call_provers_par
 
 (******************************************************************************)
 (* Main functions *)
@@ -436,6 +450,7 @@ let minimize info hyps deps goal =
 
 let predict deps1 hyps deps goal =
   let fname = Filename.temp_file "coqhammer" ".p" in
+  Msg.info ("Predicting proof... Writing file to " ^ fname);
   write_atp_file fname deps1 hyps deps goal;
   let ofname = fname ^ ".out" in
   let clean () =
@@ -447,7 +462,7 @@ let predict deps1 hyps deps goal =
           Sys.remove ofname
       end
   in
-  let call = if !Opt.parallel_mode then call_provers_par else call_provers
+  let call = call_provers
   in
   try
     let (pname, info) = call fname ofname in
@@ -530,10 +545,25 @@ let detect_cvc4 () =
       false
     end
 
+let detect_eqsat () =
+  if Sys.command "eqsat --version 2>&1 >/dev/null" = 0 then
+    begin
+      Msg.info "EQSAT found";
+      Opt.eqsat_enabled := true;
+      true
+    end
+  else
+    begin
+      Msg.info "EQSAT not found";
+      Opt.cvc4_enabled := false;
+      false
+    end
+
 let detect () =
   let b1 = detect_eprover ()
   and b2 = detect_vampire ()
   and b3 = detect_z3 ()
   and b4 = detect_cvc4 ()
+  and b5 = detect_eqsat ()
   in
-  b1 || b2 || b3 || b4
+  b1 || b2 || b3 || b4 || b5

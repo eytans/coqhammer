@@ -48,3 +48,7 @@ setup.log
 /src/hammer.ml
 .merlin
 *.install
+.crates.toml
+.crates2.json
+log.txt
+bin/eqsat
