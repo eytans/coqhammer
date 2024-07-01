@@ -305,13 +305,16 @@ let extract_cvc4_data outfile =
     let tmt = string_of_int !Opt.atp_timelimit in
     let tmt2 = string_of_int (!Opt.atp_timelimit + 1) in
     let cmd =
-      "htimeout " ^ tmt2 ^ " eqsat --tlimit " ^ tmt ^ " --out " ^ Sys.getcwd ()^ " --path " ^ infile ^ " > " ^ outfile
+      "htimeout " ^ tmt2 ^ " eqsat --tlimit " ^ tmt ^ " --verbose error --out " ^ Sys.getcwd ()^ " --path " ^ infile ^ " > " ^ outfile
     in
     invoke_prover "eqsat_tptp" cmd outfile
 
-  let extract_eqsat_data outfile =
-    raise (HammerError "Failed to extract eqsat data")
-
+  let extract_eqsat_data outfile = 
+    (* Call extract cvc4 but catch error and change text *)
+    try
+      extract_cvc4_data outfile
+    with _ ->
+      raise (HammerError "Failed to extract EQSAT data")
 (******************************************************************************)
 
 let provers = List.filteri (fun i x -> Int.equal i 4) [(Opt.vampire_enabled, "Vampire", call_vampire, extract_vampire_data);
