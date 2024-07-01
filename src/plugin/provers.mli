@@ -18,6 +18,7 @@ val extract_eprover_data : string (* file name *) -> atp_info
 val extract_vampire_data : string (* file name *) -> atp_info
 val extract_z3_data : string (* file name *) -> atp_info
 val extract_cvc4_data : string (* file name *) -> atp_info
+val extract_eqsat_data : string (* file name *) -> atp_info
 
 val write_atp_file : string (* file name *) -> hhdef list (* filtered deps *) ->
   hhdef list (* hyps *) -> hhdef list (* all deps *) -> hhdef (* goal *) -> unit
