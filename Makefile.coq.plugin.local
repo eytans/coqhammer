@@ -1,10 +1,12 @@
 COQ_SRC_SUBDIRS+=user-contrib/Hammer/Tactics
 CAMLPKGS+= -package coq-hammer-tactics.lib
+# Default to clang++, but allow override from environment
+CXX ?= clang++
 
 post-all:: predict htimeout
 
 predict: src/predict/main.cpp src/predict/predictor.cpp src/predict/format.cpp src/predict/knn.cpp src/predict/nbayes.cpp src/predict/rforest.cpp src/predict/tfidf.cpp src/predict/dtree.cpp
-	c++ -std=c++11 -DCOQ_MODE -O2 -Wall src/predict/main.cpp -o predict
+	$(CXX) -std=c++11 -DCOQ_MODE -O2 -Wall src/predict/main.cpp -o predict
 
 htimeout: src/htimeout/htimeout.c
 	cc -O2 -Wall src/htimeout/htimeout.c -o htimeout
