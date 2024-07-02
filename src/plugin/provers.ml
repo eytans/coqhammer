@@ -307,7 +307,7 @@ let extract_cvc4_data outfile =
     let cmd =
       "htimeout " ^ tmt2 ^ " eqsat --tlimit " ^ tmt ^ " --verbose error --out " ^ Sys.getcwd ()^ " --path " ^ infile ^ " > " ^ outfile
     in
-    invoke_prover "eqsat_tptp" cmd outfile
+    invoke_prover "eqsat" cmd outfile
 
   let extract_eqsat_data outfile = 
     (* Call extract cvc4 but catch error and change text *)
@@ -465,7 +465,7 @@ let predict deps1 hyps deps goal =
           Sys.remove ofname
       end
   in
-  let call = call_provers
+  let call = if !Opt.parallel_mode then call_provers_par else call_provers
   in
   try
     let (pname, info) = call fname ofname in

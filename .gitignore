@@ -52,3 +52,5 @@ setup.log
 .crates2.json
 log.txt
 bin/eqsat
+build-eqsat/
+.vscode/settings.json

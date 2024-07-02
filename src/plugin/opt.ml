@@ -180,7 +180,7 @@ let _ =
   in
   declare_string_option gdopt
 
-let parallel_mode = ref false
+let parallel_mode = ref true
 
 let _ =
   let gdopt=
@@ -192,7 +192,7 @@ let _ =
   in
   declare_bool_option gdopt
 
-let debug_mode = ref true
+let debug_mode = ref false
 
 let _ =
   let gdopt=
