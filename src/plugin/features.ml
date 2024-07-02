@@ -196,34 +196,41 @@ let extract (hyps : hhdef list) (defs : hhdef list) (goal : hhdef) : string =
 
 let run_predict fname defs pred_num pred_method =
   let oname = Filename.temp_file ("coqhammer_out" ^ pred_method ^ string_of_int pred_num) "" in
-  let cmd = !Opt.predict_path ^ " " ^ fname ^ "fea " ^ fname ^ "dep " ^
-    fname ^ "seq -n " ^ string_of_int pred_num ^
-    " -p " ^ pred_method ^ " 2>/dev/null < " ^ fname ^
-    "conj > " ^ oname
-  in
-  if !Opt.debug_mode || !Opt.gs_mode = 0 then
-    Msg.info ("Running dependency prediction (" ^ pred_method ^ "-" ^
-                 string_of_int pred_num ^ ")...");
-  if !Opt.debug_mode then
-    Msg.info cmd;
-  if Sys.command cmd <> 0 then
+  (* If pred_method is "none" assert pred_num is -1 and just return all defs *)
+  if pred_method = "none" then
     begin
-      raise (HammerError ("Dependency prediction failed.\nPrediction command: " ^ cmd))
-    end;
-  let ic = open_in oname in
-  try
-    let predicts =
-      Hhlib.strset_from_lst
-        (Str.split (Str.regexp " ")
-           (try input_line ic with End_of_file ->
-             close_in ic; Sys.remove oname;
-             raise (HammerError "Predictor did not return advice.")))
+      assert (pred_num = -1);
+      defs
+    end
+  else
+    let cmd = !Opt.predict_path ^ " " ^ fname ^ "fea " ^ fname ^ "dep " ^
+      fname ^ "seq -n " ^ string_of_int pred_num ^
+      " -p " ^ pred_method ^ " 2>/dev/null < " ^ fname ^
+      "conj > " ^ oname
     in
-    close_in ic; Sys.remove oname;
-    List.filter (fun def -> Hhlib.StringSet.mem (get_hhdef_name def) predicts) defs
-  with e ->
-    close_in ic; Sys.remove oname;
-    raise e
+    if !Opt.debug_mode || !Opt.gs_mode = 0 then
+      Msg.info ("Running dependency prediction (" ^ pred_method ^ "-" ^
+                  string_of_int pred_num ^ ")...");
+    if !Opt.debug_mode then
+      Msg.info cmd;
+    if Sys.command cmd <> 0 then
+      begin
+        raise (HammerError ("Dependency prediction failed.\nPrediction command: " ^ cmd))
+      end;
+    let ic = open_in oname in
+    try
+      let predicts =
+        Hhlib.strset_from_lst
+          (Str.split (Str.regexp " ")
+            (try input_line ic with End_of_file ->
+              close_in ic; Sys.remove oname;
+              raise (HammerError "Predictor did not return advice.")))
+      in
+      close_in ic; Sys.remove oname;
+      List.filter (fun def -> Hhlib.StringSet.mem (get_hhdef_name def) predicts) defs
+    with e ->
+      close_in ic; Sys.remove oname;
+      raise e
 
 let clean fname =
   if not !Opt.debug_mode then

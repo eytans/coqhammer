@@ -633,7 +633,11 @@ let run_tactics deps defs inverts msg_success msg_fail msg_batch =
 let do_predict hyps deps goal =
   if !Opt.gs_mode > 0 then
     let greedy_sequence =
-      [("CVC4 (nbayes-128)", !Opt.cvc4_enabled, Opt.cvc4_enabled, "nbayes", 128);
+      [
+       ("eqsat (none--1)", !Opt.eqsat_enabled, Opt.eqsat_enabled, "none", -1);
+       ("eqsat (nbayes-256)", !Opt.eqsat_enabled, Opt.eqsat_enabled, "nbayes", 256);
+       ("eqsat (knn-1024)", !Opt.eqsat_enabled, Opt.eqsat_enabled, "knn", 1024);
+       ("CVC4 (nbayes-128)", !Opt.cvc4_enabled, Opt.cvc4_enabled, "nbayes", 128);
        ("Vampire (knn-1024)", !Opt.vampire_enabled, Opt.vampire_enabled, "knn", 1024);
        ("CVC4 (knn-64)", !Opt.cvc4_enabled, Opt.cvc4_enabled, "knn", 64);
        ("CVC4 (knn-256)", !Opt.cvc4_enabled, Opt.cvc4_enabled, "knn", 256);
@@ -911,9 +915,10 @@ let hammer_hook_tac prefix name =
   let premises = [("knn", 32); ("knn", 64); ("knn", 128); ("knn", 256); ("knn", 1024);
                   ("nbayes", 32); ("nbayes", 64); ("nbayes", 128); ("nbayes", 256); ("nbayes", 1024)]
   and provers = [("vampire", Provers.extract_vampire_data); ("eprover", Provers.extract_eprover_data);
-                 ("z3", Provers.extract_z3_data); ("cvc4", Provers.extract_cvc4_data); ("eqsat", Provers.extract_eqsat_data)]
+                 ("z3", Provers.extract_z3_data); ("cvc4", Provers.extract_cvc4_data); 
+                 ("eqsat", Provers.extract_eqsat_data)]
   in
-  let premise_prover_lst = Hhlib.mk_all_pairs premises provers
+  let premise_prover_lst = (("none", -1), ("eqsat", Provers.extract_eqsat_data)) :: Hhlib.mk_all_pairs premises provers
   in
   try_goal_tactic_nofail begin fun gl ->
     Msg.info ("Processing theorem " ^ name ^ "...");
