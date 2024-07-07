@@ -7,12 +7,13 @@ do
     echo $d
     rm -f i/f
     ln -s ../$d i/f
-    make -k -j "$1" eprover vampire z3 cvc4
+    make -k -j "$1" eprover vampire z3 cvc4 eqsat
     p=`basename $d`
     mv o/eprover o/eprover-$p
     mv o/vampire o/vampire-$p
     mv o/z3 o/z3-$p
     mv o/cvc4 o/cvc4-$p
+    mv o/eqsat o/eqsat-$p
     if [ -n "$2" ]; then
         echo "" | mail -s "provers $p finished" "$2"
     fi

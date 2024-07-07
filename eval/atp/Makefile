@@ -10,7 +10,7 @@ FFILES=$(shell find i/f/ -type f | sort -R)
 # timeout (in seconds)
 TIM=30
 
-all: eprover vampire z3 cvc4
+all: eprover vampire z3 cvc4 eqsat
 
 eprover: $(patsubst i/f/%,o/eprover/%,$(FFILES))
 o/eprover/%: i/f/%
@@ -31,3 +31,7 @@ cvc4: $(patsubst i/f/%,o/cvc4/%,$(FFILES))
 o/cvc4/%: i/f/%
 	@mkdir -p `dirname "$@"`
 	@htimeout $(TIM) cvc4 --tlimit $(TIM) --dump-unsat-cores-full "$<" > "$@"
+
+eqsat: $(patsubst i/f/%,o/eqsat/%,$(FFILES))
+	@mkdir -p `dirname "$@"`
+	@htimeout $(TIM) eqsat  --verbose error --out $(CURDIR) --path  "$<" > "$@"

@@ -54,3 +54,5 @@ log.txt
 bin/eqsat
 build-eqsat/
 .vscode/settings.json
+eval/atp/o/
+eval/logs/*
