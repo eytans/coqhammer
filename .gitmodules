@@ -1,0 +1,3 @@
+[submodule "eval/problems"]
+	path = eval/problems
+	url = git@github.com:lukaszcz/coqhammer-eval.git

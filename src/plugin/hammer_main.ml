@@ -918,7 +918,9 @@ let hammer_hook_tac prefix name =
                  ("z3", Provers.extract_z3_data); ("cvc4", Provers.extract_cvc4_data); 
                  ("eqsat", Provers.extract_eqsat_data)]
   in
-  let premise_prover_lst = (("none", -1), ("eqsat", Provers.extract_eqsat_data)) :: Hhlib.mk_all_pairs premises provers
+  let premise_prover_lst = (("none", -1), ("eqsat", Provers.extract_eqsat_data)) :: Hhlib.mk_all_pairs premises provers 
+  in
+  let premises = ("none", -1) :: premises 
   in
   try_goal_tactic_nofail begin fun gl ->
     Msg.info ("Processing theorem " ^ name ^ "...");
@@ -934,6 +936,7 @@ let hammer_hook_tac prefix name =
             begin
               let env = Proofview.Goal.env gl in
               let sigma = Proofview.Goal.sigma gl in
+              Msg.info ("Generating ATP problems for " ^ name ^ "...");
               List.iter
                 begin fun (met, n) ->
                   let str = met ^ "-" ^ string_of_int n in
@@ -949,7 +952,14 @@ let hammer_hook_tac prefix name =
                   let goal = get_goal gl in
                   let hyps = get_hyps gl in
                   let defs = get_defs env sigma in
-                  let defs1 = Features.predict hyps defs goal in
+                  let defs1 = if met = "none" then
+                    begin
+                      assert (n = -1);
+                      defs
+                    end
+                  else
+                    Features.predict hyps defs goal
+                  in
                   Provers.write_atp_file (dir ^ "/" ^ name ^ ".p") defs1 hyps defs goal
                 end
                 premises;
