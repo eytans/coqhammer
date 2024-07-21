@@ -317,7 +317,7 @@ let extract_cvc4_data outfile =
       raise (HammerError "Failed to extract EQSAT data")
 (******************************************************************************)
 
-let provers = List.filteri (fun i x -> Int.equal i 4) [(Opt.vampire_enabled, "Vampire", call_vampire, extract_vampire_data);
+let provers = [(Opt.vampire_enabled, "Vampire", call_vampire, extract_vampire_data);
                (Opt.z3_enabled, "Z3", call_z3, extract_z3_data);
                (Opt.eprover_enabled, "EProver", call_eprover, extract_eprover_data);
                (Opt.cvc4_enabled, "CVC4", call_cvc4, extract_cvc4_data);
